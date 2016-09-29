@@ -5,7 +5,6 @@ from telegram.ext import CommandHandler
 from telegram.ext import Updater
 
 import logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
 def start(bot, update):
@@ -13,7 +12,9 @@ def start(bot, update):
 
 start_handler = CommandHandler('start', start)
 
-def main():
+def main(debug=False):
+  level = logging.DEBUG if debug else logging.INFO
+  logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=level)
   token=""
   try:
     with open(".token", 'r') as f:
@@ -34,8 +35,18 @@ def main():
   print("Idle...")
   updater.idle()
 
+
+
 if __name__=='__main__':
-  main()
+
+  # Argument parsing
+  import argparse
+  parser = argparse.ArgumentParser(description='HackPizzaBot.\nPizza scheduling powered by the power of robots!')
+  parser.add_argument('-d', '--debug', action='store_true', help="Enable debug information")
+  args = parser.parse_args()
+
+  # Run bot
+  main(debug=args.debug)
 
 #"""
 #Use a custom keyboard
