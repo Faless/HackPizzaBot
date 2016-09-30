@@ -1,2 +1,4 @@
 .venv
 .token
+*.pyc
+*.swp
