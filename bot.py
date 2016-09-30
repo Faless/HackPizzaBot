@@ -4,7 +4,7 @@ from telegram import ReplyKeyboardMarkup, InlineQueryResultArticle, InputTextMes
 from telegram.ext import Updater
 from includes import User, Event, Order
 from handlers import start_handler, event_handler, add_event_handler
-from database import setup_db, add_user, add_event, add_order, list_events, list_users, list_orders, get_event, get_user, get_order, archive_event, del_order
+from database import init_db, add_user, add_event, add_order, list_events, list_users, list_orders, get_event, get_user, get_order, archive_event, del_order
 
 import logging
 
@@ -12,7 +12,7 @@ import logging
 def main(debug=False):
   level = logging.DEBUG if debug else logging.INFO
   logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=level)
-  setup_db()
+  init_db()
   token=""
   try:
     with open(".token", 'r') as f:
