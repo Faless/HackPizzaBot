@@ -1,20 +1,18 @@
 # https://github.com/python-telegram-bot/python-telegram-bot/wiki/Extensions-%E2%80%93-Your-first-Bot
 
-from telegram import ReplyKeyboardMarkup
-from telegram.ext import CommandHandler
+from telegram import ReplyKeyboardMarkup, InlineQueryResultArticle, InputTextMessageContent
 from telegram.ext import Updater
+from includes import User, Event, Order
+from handlers import start_handler, event_handler
+from database import setup_db, add_user, add_event, add_order, list_events, list_users, list_orders, get_event, get_user, get_order, archive_event, del_order
 
 import logging
 
 
-def start(bot, update):
-	bot.sendMessage(chat_id=update.message.chat_id, text="I'm a bot, please talk to me!")
-
-start_handler = CommandHandler('start', start)
-
 def main(debug=False):
   level = logging.DEBUG if debug else logging.INFO
   logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=level)
+  setup_db()
   token=""
   try:
     with open(".token", 'r') as f:
@@ -28,6 +26,7 @@ def main(debug=False):
   print("Connected")
   dispatcher = updater.dispatcher
   dispatcher.add_handler(start_handler)
+  dispatcher.add_handler(event_handler)
 
   print("Start polling...")
   updater.start_polling()
@@ -38,7 +37,6 @@ def main(debug=False):
 
 
 if __name__=='__main__':
-
   # Argument parsing
   import argparse
   parser = argparse.ArgumentParser(description='HackPizzaBot.\nPizza scheduling powered by the power of robots!')
