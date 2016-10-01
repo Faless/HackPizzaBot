@@ -3,7 +3,7 @@
 from telegram import ReplyKeyboardMarkup, InlineQueryResultArticle, InputTextMessageContent
 from telegram.ext import Updater
 from includes import User, Event, Order
-from handlers import start_handler, event_handler, add_event_handler
+from handlers import start_handler, event_handler, add_event_handler, order_handler, add_order_handler, help_handler
 from database import init_db, add_user, add_event, add_order, list_events, list_users, list_orders, get_event, get_user, get_order, archive_event, del_order
 
 import logging
@@ -27,7 +27,10 @@ def main(debug=False):
   dispatcher = updater.dispatcher
   dispatcher.add_handler(start_handler)
   dispatcher.add_handler(event_handler)
+  dispatcher.add_handler(order_handler)
+  dispatcher.add_handler(help_handler)
   dispatcher.add_handler(add_event_handler)
+  dispatcher.add_handler(add_order_handler)
 
   print("Start polling...")
   updater.start_polling()

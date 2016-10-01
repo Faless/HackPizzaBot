@@ -56,14 +56,15 @@ def safe_find(entity, filter=None):
     if filter is not None:
      return q.filter_by(**filter).all()
     return q.all()
-  except e:
+  except Exception as e:
     print(e)
   finally:
     lock.release()
+  return []
 
 
 def add_user(user):
-  safe_add(obj)
+  safe_add(user)
 
 
 def add_event(event):
@@ -71,7 +72,7 @@ def add_event(event):
 
 
 def add_order(order):
-  safe_add(event)
+  safe_add(order)
 
 
 def del_order(eid, uid):
@@ -99,7 +100,7 @@ def list_orders(eid):
   orders = safe_find(Order, {"eid": eid})
   out = {}
   for o in orders:
-    out[o.uid] = {"user": safe_find(User, {"uid": o.uid}), "order": o}
+    out[o.uid] = {"user": safe_find(User, {"uid": o.uid})[0], "order": o}
   return out
 
 
@@ -117,8 +118,8 @@ def get_user(uid):
   return None
 
 
-def get_order(uid, eid):
-  out = safe_find(User, {"uid": uid, "eid": eid})
+def get_order(eid, uid):
+  out = safe_find(Order, {"uid": uid, "eid": eid})
   if len(out) > 0:
     return out[0]
   return None

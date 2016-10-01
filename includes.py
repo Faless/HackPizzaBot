@@ -51,7 +51,7 @@ class Order(Base):
     self.data = data
 
   def __str__(self):
-    return "%s - %s - Order %d" % (self.eid, self.oid, self.data)
+    return "%d - %d - Order: %s" % (self.eid, self.uid, self.data)
 
   def __repr__(self):
-    return "<Order(eid='%s', uid='%s', data='%s')" % (self.eid, self.uid, self.data)
+    return "<Order(eid='%d', uid='%d', data='%s')" % (self.eid, self.uid, self.data)
