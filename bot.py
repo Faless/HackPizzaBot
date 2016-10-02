@@ -1,10 +1,6 @@
-# https://github.com/python-telegram-bot/python-telegram-bot/wiki/Extensions-%E2%80%93-Your-first-Bot
-
-from telegram import ReplyKeyboardMarkup, InlineQueryResultArticle, InputTextMessageContent
 from telegram.ext import Updater
-from includes import User, Event, Order
-from handlers import start_handler, event_handler, add_event_handler, order_handler, add_order_handler, help_handler
-from database import init_db, add_user, add_event, add_order, list_events, list_users, list_orders, get_event, get_user, get_order, archive_event, del_order
+from database import init_db
+from handlers import EventHandler, OrderHandler, MiscHandler
 
 import logging
 
@@ -25,19 +21,18 @@ def main(debug=False):
   updater = Updater(token=token)
   print("Connected")
   dispatcher = updater.dispatcher
-  dispatcher.add_handler(start_handler)
-  dispatcher.add_handler(event_handler)
-  dispatcher.add_handler(order_handler)
-  dispatcher.add_handler(help_handler)
-  dispatcher.add_handler(add_event_handler)
-  dispatcher.add_handler(add_order_handler)
 
+  eventhandler = EventHandler()
+  eventhandler.register(dispatcher)
+  orderhandler = OrderHandler()
+  orderhandler.register(dispatcher)
+  mischandler = MiscHandler()
+  mischandler.register(dispatcher)
   print("Start polling...")
   updater.start_polling()
 
   print("Idle...")
   updater.idle()
-
 
 
 if __name__=='__main__':
@@ -50,15 +45,3 @@ if __name__=='__main__':
   # Run bot
   main(debug=args.debug)
 
-#"""
-#Use a custom keyboard
-#"""
-#keyboard = [
-#    ['Add Event'],
-#    ['Add Pizza'],
-#    ['Add Drinks'],
-#    ['List Events']
-#]
-#reply_markup = ReplyKeyboardMarkup(keyboard)
-
-#bot.send_message(user_id, 'please enter a number', reply_markup=reply_markup).wait()
