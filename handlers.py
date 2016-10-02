@@ -1,9 +1,10 @@
 from telegram.ext import MessageHandler, CommandHandler, ConversationHandler, Filters, RegexHandler
-from telegram import ReplyKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardHide
 from database import list_events, add_event, get_event, add_order, list_orders, get_order, add_user, get_user
 from includes import Event, User, Order
 
 YesNoKbd = ReplyKeyboardMarkup([['YES', 'NO']], one_time_keyboard=True)
+HideKbd = ReplyKeyboardHide()
 
 class Storage:
 
@@ -43,7 +44,7 @@ class BaseHandler(object):
     self.handlers = []
 
   def cancel(self, bot, update, msg="Mission aborted!"):
-    bot.sendMessage(chat_id=update.message.chat_id, text=msg)
+    bot.sendMessage(chat_id=update.message.chat_id, text=msg, reply_markup=HideKbd)
     self.storage.remove(update.message.chat_id, update.message.from_user.id)
     return ConversationHandler.END
 
@@ -99,7 +100,7 @@ class EventHandler(BaseHandler):
     bot.sendMessage(chat_id=update.message.chat_id, text="Event List:\n%s" % ("\n".join([str(e) for e in events]) if len(events) > 0 else "No events"))
 
   def create_start(self, bot, update):
-    update.message.reply_text("Please select the name for the new event or type /cancel to abort")
+    update.message.reply_text("Please select the name for the new event or type /cancel to abort", reply_markup=HideKbd)
     return EventHandler.NEW_NAME
 
   def select_name(self, bot, update):
@@ -112,6 +113,7 @@ class EventHandler(BaseHandler):
     return EventHandler.NEW_CONFIRM
 
   def create_end(self, bot, update):
+    ####self.hide_kbd(bot, update)
     if update.message.text != "YES":
       return self.create_start(bot,update)
     name = self.storage.get(update.message.chat_id, update.message.from_user.id, None)
@@ -121,7 +123,7 @@ class EventHandler(BaseHandler):
     self.storage.remove(update.message.chat_id, update.message.from_user.id)
   
     add_event(Event(eid=None, name=name, archive=0))
-    update.message.reply_text("Event with name: \"%s\" has been created" % name)
+    update.message.reply_text("Event with name: \"%s\" has been created" % name, reply_markup=HideKbd)
     return ConversationHandler.END
 
 
@@ -187,7 +189,7 @@ class OrderHandler(BaseHandler):
       update.message.reply_text("You already placed an order for this event")
       return self.cancel(bot,update)
     self.storage.set(update.message.chat_id, update.message.from_user.id, {"eid": eid})
-    update.message.reply_text("Please specify the order for event %s or type /cancel to abort" % eid)
+    update.message.reply_text("Please specify the order for event %s or type /cancel to abort" % eid, reply_markup=HideKbd)
     return OrderHandler.NEW_NAME
 
   def select_name(self, bot, update):
@@ -206,17 +208,17 @@ class OrderHandler(BaseHandler):
   
   def create_end(self, bot, update):
     if update.message.text != "YES":
-      return OrderHandler.NEW_NAME
+      return self.cancel(bot, update)
     data = self.storage.get(update.message.chat_id, update.message.from_user.id)
     if data is None:
-      return OrderHandler.NEW_NAME
+      return self.cancel(bot, update)
   
     user = update.message.from_user
     if get_user(user.id) is None:
       add_user(User(uid=user.id, name=user.first_name, nick=user.username))
   
     add_order(Order(eid=data["eid"], uid=update.message.from_user.id, data=data["order"]))
-    update.message.reply_text("Order added to event %s: \"%s\"" % (data["eid"], data["order"]))
+    update.message.reply_text("Order added to event %s: \"%s\"" % (data["eid"], data["order"]), reply_markup=HideKbd)
     self.storage.remove(update.message.chat_id, update.message.from_user.id)
     return ConversationHandler.END
   
