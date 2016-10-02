@@ -205,20 +205,20 @@ class OrderHandler(BaseHandler):
     reply_keyboard = [['YES', 'NO']]
     update.message.reply_text("Your order will be: %s" % name, reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
     return OrderHandler.NEW_CONFIRM
-  
+
   def create_end(self, bot, update):
     if update.message.text != "YES":
       return self.cancel(bot, update)
     data = self.storage.get(update.message.chat_id, update.message.from_user.id)
     if data is None:
       return self.cancel(bot, update)
-  
+
     user = update.message.from_user
     if get_user(user.id) is None:
       add_user(User(uid=user.id, name=user.first_name, nick=user.username))
-  
+
     add_order(Order(eid=data["eid"], uid=update.message.from_user.id, data=data["order"]))
     update.message.reply_text("Order added to event %s: \"%s\"" % (data["eid"], data["order"]), reply_markup=HideKbd)
     self.storage.remove(update.message.chat_id, update.message.from_user.id)
     return ConversationHandler.END
-  
+
